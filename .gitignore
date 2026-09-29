@@ -19,3 +19,6 @@ data/*.json
 # 作業原始檔（hw1.txt 內含 API 金鑰，勿上傳）
 hw1.txt
 hw1.png
+
+# Streamlit Cloud secrets（本機測試用，勿上傳）
+.streamlit/secrets.toml

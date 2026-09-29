@@ -3,6 +3,8 @@
 AIoT HW1：使用 AI Agent（Vibe Coding）開發的台灣一週天氣預報網站。
 從 **中央氣象署（CWA）開放資料 API** 抓取資料 → 解析 JSON → 存入 **SQLite** → 用 **Streamlit** 呈現互動式網頁。
 
+🔗 **線上展示：** （部署後填入 Streamlit Cloud 網址）
+
 ![分區地圖](docs/screenshot_region.png)
 
 ## ✨ 功能
@@ -69,6 +71,16 @@ streamlit run app.py
 ```
 
 開啟瀏覽器 http://localhost:8501 即可看到網站。
+
+## ☁️ 部署到 Streamlit Cloud
+
+1. 到 https://share.streamlit.io 用 GitHub 登入 → **Create app** → *Deploy a public app from GitHub*
+2. Repository 選 `JuiPiao-Chen/AIoT-HW1`、Branch `main`、Main file path `app.py`
+3. **Advanced settings → Secrets** 貼上（格式見 `.streamlit/secrets.toml.example`）：
+   ```toml
+   CWA_API_KEY = "你的 CWA 授權碼"
+   ```
+4. 按 **Deploy**。雲端的檔案系統是暫時性的，App 啟動時若資料庫為空、或資料超過 3 小時，會自動從 CWA 重新抓取。
 
 ## 🗄️ 資料庫結構
 

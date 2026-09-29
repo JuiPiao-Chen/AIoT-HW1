@@ -3,6 +3,7 @@
 執行: streamlit run app.py
 """
 import json
+from datetime import datetime, timedelta
 
 import altair as alt
 import pandas as pd
@@ -74,12 +75,27 @@ with st.sidebar:
     st.caption(f"最後更新：{last_updated() or '尚無資料'}")
     st.caption("資料來源：中央氣象署開放資料平臺 F-D0047-091（臺灣各縣市未來 1 週逐 12 小時天氣預報）")
 
+STALE_AFTER = timedelta(hours=3)  # CWA 一週預報約每 6 小時更新
+
+
+def data_is_stale() -> bool:
+    ts = last_updated()
+    return ts is None or datetime.now() - datetime.fromisoformat(ts) > STALE_AFTER
+
+
+# 資料庫為空（例如 Streamlit Cloud 重啟後）或資料過舊時，自動從 CWA 更新
+if data_is_stale():
+    with st.spinner("正在從中央氣象署抓取最新資料..."):
+        try:
+            update()
+            get_data.clear()
+        except Exception as e:  # noqa: BLE001
+            st.warning(f"自動更新失敗，將顯示既有資料：{e}")
+
 df = get_data()
 if df.empty:
-    st.warning("資料庫尚無資料，嘗試從 CWA 抓取中...")
-    update()
-    get_data.clear()
-    df = get_data()
+    st.error("目前沒有任何天氣資料，請確認 CWA_API_KEY 設定是否正確。")
+    st.stop()
 
 # ---------------- Header ----------------
 st.title("🌤️ Taiwan Weather Forecast")

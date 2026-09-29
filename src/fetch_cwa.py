@@ -13,9 +13,16 @@ load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 
 def get_api_key() -> str:
+    """優先讀環境變數 / .env（本機），否則讀 Streamlit Secrets（Streamlit Cloud）。"""
     key = os.getenv("CWA_API_KEY")
     if not key:
-        raise RuntimeError("找不到 CWA_API_KEY，請在 .env 中設定（參考 .env.example）")
+        try:
+            import streamlit as st
+            key = st.secrets.get("CWA_API_KEY")
+        except Exception:  # noqa: BLE001  # 沒有 secrets.toml 時 st.secrets 會拋錯
+            key = None
+    if not key:
+        raise RuntimeError("找不到 CWA_API_KEY：本機請設定 .env，Streamlit Cloud 請在 App settings → Secrets 設定")
     return key
 
 
