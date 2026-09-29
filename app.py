@@ -10,7 +10,7 @@ import pandas as pd
 import pydeck as pdk
 import streamlit as st
 
-from src.db import last_updated, load_forecast
+from src.db import last_updated, load_forecast, now_tw
 from src.parse_data import REGION_ORDER
 from update_data import update
 
@@ -61,6 +61,23 @@ def region_summary(day_df: pd.DataFrame) -> pd.DataFrame:
     return g.reset_index()
 
 
+STALE_AFTER = timedelta(hours=3)  # CWA 一週預報約每 6 小時更新
+
+
+def data_is_stale() -> bool:
+    ts = last_updated()
+    return ts is None or now_tw() - datetime.fromisoformat(ts) > STALE_AFTER
+
+
+# 資料庫為空（例如 Streamlit Cloud 重啟後）或資料過舊時，自動從 CWA 更新
+if data_is_stale():
+    with st.spinner("正在從中央氣象署抓取最新資料..."):
+        try:
+            update()
+            get_data.clear()
+        except Exception as e:  # noqa: BLE001
+            st.warning(f"自動更新失敗，將顯示既有資料：{e}")
+
 # ---------------- Sidebar ----------------
 with st.sidebar:
     st.header("⚙️ 資料設定")
@@ -72,25 +89,9 @@ with st.sidebar:
                 st.success(f"已更新 {n} 筆資料")
             except Exception as e:  # noqa: BLE001
                 st.error(f"更新失敗：{e}")
-    st.caption(f"最後更新：{last_updated() or '尚無資料'}")
-    st.caption("資料來源：中央氣象署開放資料平臺 F-D0047-091（臺灣各縣市未來 1 週逐 12 小時天氣預報）")
-
-STALE_AFTER = timedelta(hours=3)  # CWA 一週預報約每 6 小時更新
-
-
-def data_is_stale() -> bool:
     ts = last_updated()
-    return ts is None or datetime.now() - datetime.fromisoformat(ts) > STALE_AFTER
-
-
-# 資料庫為空（例如 Streamlit Cloud 重啟後）或資料過舊時，自動從 CWA 更新
-if data_is_stale():
-    with st.spinner("正在從中央氣象署抓取最新資料..."):
-        try:
-            update()
-            get_data.clear()
-        except Exception as e:  # noqa: BLE001
-            st.warning(f"自動更新失敗，將顯示既有資料：{e}")
+    st.caption(f"最後更新：{ts.replace('T', ' ') + '（台灣時間）' if ts else '尚無資料'}")
+    st.caption("資料來源：中央氣象署開放資料平臺 F-D0047-091（臺灣各縣市未來 1 週逐 12 小時天氣預報）")
 
 df = get_data()
 if df.empty:

@@ -3,7 +3,7 @@
 AIoT HW1：使用 AI Agent（Vibe Coding）開發的台灣一週天氣預報網站。
 從 **中央氣象署（CWA）開放資料 API** 抓取資料 → 解析 JSON → 存入 **SQLite** → 用 **Streamlit** 呈現互動式網頁。
 
-🔗 **線上展示：** （部署後填入 Streamlit Cloud 網址）
+🔗 **線上展示：** https://aiot-hw1-weather.streamlit.app/
 
 ![分區地圖](docs/screenshot_region.png)
 
