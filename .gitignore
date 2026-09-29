@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# 機密：CWA API 授權碼
+.env
+
+# 執行時產生的資料（可用 python update_data.py 重新產生）
+data/*.db
+data/*.json
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+
+# 作業原始檔（hw1.txt 內含 API 金鑰，勿上傳）
+hw1.txt
+hw1.png
